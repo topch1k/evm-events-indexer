@@ -23,7 +23,7 @@ async fn main() -> IndexerResult<()> {
     let args = config::parse();
     let conf = config::load(PathBuf::from(args.config_path))?;
 
-    let pool = init_db(&conf.db_path).unwrap(); //TODO:
+    let pool = init_db(&conf.db_path)?;
     let repo = ERC20TransferRepo::new(pool);
 
     let consumer = TypedLogConsumer::<TransferEvent, _>::new(conf.event_info.event.clone(), repo);

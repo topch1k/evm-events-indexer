@@ -1,23 +1,26 @@
 use r2d2_sqlite::SqliteConnectionManager;
 
-use crate::{db::repository::EventRepository, event::EventMessage, transfer_event::TransferEvent};
+use crate::{
+    db::repository::EventRepository, errors::Errors, event::EventMessage,
+    transfer_event::TransferEvent,
+};
 
 pub struct ERC20TransferRepo {
-    _pool: r2d2::Pool<SqliteConnectionManager>,
+    pool: r2d2::Pool<SqliteConnectionManager>,
 }
 
 impl ERC20TransferRepo {
     pub fn new(pool: r2d2::Pool<SqliteConnectionManager>) -> Self {
-        Self { _pool: pool }
+        Self { pool }
     }
 }
 
 #[async_trait::async_trait]
 impl EventRepository for ERC20TransferRepo {
-    type Err = ();
+    type Err = Errors;
     type EventType = TransferEvent;
     async fn store_event(&self, event: EventMessage<TransferEvent>) -> Result<(), Self::Err> {
-        log::debug!("Storing event : {event:?}");
+        log::trace!("Storing event : {event:?}");
 
         let EventMessage {
             block_number,
@@ -26,10 +29,12 @@ impl EventRepository for ERC20TransferRepo {
             event: TransferEvent { from, to, value },
         } = event;
 
-        let conn = self._pool.get().unwrap(); //TODO:
+        let conn = self.pool.get()?;
         let res = conn
             .execute(
-                "INSERT INTO erc20_transfer_events(id, \"from\", \"to\", \"value\", block_number, tx_hash, log_index) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7 ) ON CONFLICT DO NOTHING",
+                "INSERT INTO erc20_transfer_events(id, \"from\", \"to\", \"value\", block_number, tx_hash, log_index) 
+                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7 ) 
+                ON CONFLICT DO NOTHING",
                 (
                     None::<u64>,
                     from.to_string(),
@@ -39,8 +44,7 @@ impl EventRepository for ERC20TransferRepo {
                     tx_hash.to_string(),
                     log_index.to_string(),
                 )
-            )
-            .unwrap(); //TODO:
+            )?;
 
         log::debug!("Inserting res : {res}",);
 

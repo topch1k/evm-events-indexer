@@ -17,6 +17,12 @@ pub enum Errors {
 
     #[error(transparent)]
     R2D2Errors(#[from] r2d2::Error),
+
+    #[error(transparent)]
+    RusqliteErrors(#[from] rusqlite::Error),
+
+    #[error(transparent)]
+    RusqliteMigrationErrors(#[from] rusqlite_migration::Error),
 }
 
 pub type IndexerResult<T> = Result<T, Errors>;
