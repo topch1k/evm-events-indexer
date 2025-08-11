@@ -1,17 +1,17 @@
-use std::fmt::Debug;
-
-use ethers::{
-    providers::{JsonRpcClient, Provider, PubsubClient},
-    types::{Filter, FilterBlockOption},
-};
-use serde::de::DeserializeOwned;
-
+use crate::event::TopicFilters;
+use crate::log_consumer::ConsumeEvent;
 use crate::{
     db::repository::EventRepository, errors::IndexerResult, event::EventIndexingInfo,
     log_consumer::TypedLogConsumer,
 };
 use ethers::middleware::Middleware;
+use ethers::{
+    providers::{JsonRpcClient, Provider, PubsubClient},
+    types::{Filter, FilterBlockOption},
+};
 use futures::StreamExt;
+use serde::de::DeserializeOwned;
+use std::fmt::Debug;
 
 pub struct LogIndexer<P> {
     pub provider: Provider<P>,
@@ -34,15 +34,14 @@ where
         log_consumer: &TypedLogConsumer<T, R>,
     ) -> IndexerResult<()>
     where
-        T: DeserializeOwned + Debug,
-        R: EventRepository<EventType = T>,
+        T: DeserializeOwned + Debug + Send + Sync,
+        R: EventRepository<EventType = T> + Send + Sync,
     {
         let filter: Filter = event_indexing_info.into();
 
         let mut stream = self.provider.subscribe_logs(&filter).await?;
         while let Some(log) = stream.next().await {
-            log::debug!("Log from indexer : {log:?}");
-            log_consumer.consume_events(log).await?;
+            log_consumer.consume_event(log).await?;
         }
         Ok(())
     }
@@ -50,17 +49,40 @@ where
 
 impl From<EventIndexingInfo> for Filter {
     fn from(value: EventIndexingInfo) -> Self {
-        let block_filter = match value.to_block {
-            Some(to_block) => FilterBlockOption::Range {
-                from_block: Some(value.from_block),
-                to_block: Some(to_block),
-            },
-            None => todo!(),
-        };
+        let block_filter: FilterBlockOption = value.block_filter.clone().into();
 
-        Filter::new()
+        let filter = Filter::new()
             .address(value.contract)
             .select(block_filter)
-            .topic0(value.event.signature())
+            .topic0(value.event.signature());
+
+        if let Some(filters) = value.filters {
+            let TopicFilters {
+                topic1,
+                topic2,
+                topic3,
+            } = filters;
+
+            let filter = if let Some(topic1) = topic1 {
+                filter.topic1(topic1)
+            } else {
+                filter
+            };
+
+            let filter = if let Some(topic2) = topic2 {
+                filter.topic2(topic2)
+            } else {
+                filter
+            };
+
+            let filter = if let Some(topic3) = topic3 {
+                filter.topic3(topic3)
+            } else {
+                filter
+            };
+            filter
+        } else {
+            filter
+        }
     }
 }

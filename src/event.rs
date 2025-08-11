@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use ethers::{
-    abi::{Event, Token},
-    types::{Address, BlockNumber, H256, U256, U64},
+    abi::{Event, Hash, Token},
+    types::{Address, BlockNumber, FilterBlockOption, H256, U64, U256},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -14,8 +14,39 @@ use crate::errors::IndexerResult;
 pub struct EventIndexingInfo {
     pub event: Event,
     pub contract: Address,
-    pub from_block: BlockNumber,
-    pub to_block: Option<BlockNumber>,
+    pub block_filter: BlockFilter,
+    pub filters: Option<TopicFilters>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct TopicFilters {
+    pub topic1: Option<Hash>,
+    pub topic2: Option<Hash>,
+    pub topic3: Option<Hash>,
+}
+#[derive(Debug, Clone, Deserialize, Serialize)]
+
+pub enum BlockFilter {
+    Range {
+        from_block: BlockNumber,
+        to_block: Option<BlockNumber>,
+    },
+    AtBlockHash(H256),
+}
+
+impl From<BlockFilter> for FilterBlockOption {
+    fn from(value: BlockFilter) -> Self {
+        match value {
+            BlockFilter::Range {
+                from_block,
+                to_block,
+            } => FilterBlockOption::Range {
+                from_block: Some(from_block),
+                to_block: to_block,
+            },
+            BlockFilter::AtBlockHash(block_hash) => FilterBlockOption::AtBlockHash(block_hash),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -19,7 +19,7 @@ pub fn parse() -> Args {
 #[serde(rename_all = "kebab-case")]
 #[config]
 pub struct Config {
-    pub log_level: String,
+    pub log_level: String, //TODO: Use log level from config
     pub port: u32,
     pub event_info: EventIndexingInfo,
     pub db_path: String,
@@ -28,7 +28,7 @@ pub struct Config {
 
 pub fn load(path: PathBuf) -> IndexerResult<Config> {
     let path = path.into();
-    let conf = Config::with_layers(&[Layer::Yaml(path)])?;
+    let conf = Config::with_layers(&[Layer::Yaml(path)])?; //TODO: Add additional level: ENV
 
     Ok(conf)
 }

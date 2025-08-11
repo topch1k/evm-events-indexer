@@ -27,11 +27,21 @@ impl<T, R> TypedLogConsumer<T, R> {
     }
 }
 
-impl<T, R: EventRepository<EventType = T>> TypedLogConsumer<T, R>
+#[async_trait::async_trait]
+pub trait ConsumeEvent<T, R: EventRepository<EventType = T>>
 where
     T: DeserializeOwned + Debug,
 {
-    pub async fn consume_events(&self, log: Log) -> IndexerResult<()> {
+    async fn consume_event(&self, log: Log) -> IndexerResult<()>;
+}
+
+#[async_trait::async_trait]
+impl<T, R: EventRepository<EventType = T> + Sync + Send> ConsumeEvent<T, R>
+    for TypedLogConsumer<T, R>
+where
+    T: DeserializeOwned + Debug + Send + Sync,
+{
+    async fn consume_event(&self, log: Log) -> IndexerResult<()> {
         let raw_log: RawLog = (log.topics, log.data.to_vec()).into();
         let parsed_log = self.event.parse_log(raw_log)?;
         let raw_event_message = RawEventMessage::try_from(parsed_log)?;
