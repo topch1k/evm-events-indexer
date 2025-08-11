@@ -1,0 +1,1 @@
+DROP TABLE erc20_transfer_events;
