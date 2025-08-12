@@ -30,7 +30,7 @@ async fn main() -> IndexerResult<()> {
 
     let provider = Provider::<Ws>::connect(conf.node_url).await?;
     let indexer = LogIndexer::new(provider, conf.event_info.clone());
-    let _ = indexer.run(conf.event_info, &consumer).await?;
+    indexer.run(conf.event_info, &consumer).await?;
 
     Ok(())
 }

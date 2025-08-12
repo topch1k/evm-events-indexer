@@ -25,13 +25,19 @@ pub struct TopicFilters {
     pub topic3: Option<Hash>,
 }
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
+#[serde(tag = "kind")]
+#[serde(rename_all = "kebab-case")]
 pub enum BlockFilter {
     Range {
+        #[serde(rename = "from-block")]
         from_block: BlockNumber,
+        #[serde(rename = "to-block")]
         to_block: Option<BlockNumber>,
     },
-    AtBlockHash(H256),
+    AtBlockHash {
+        #[serde(rename = "hash")]
+        hash: H256,
+    },
 }
 
 impl From<BlockFilter> for FilterBlockOption {
@@ -42,9 +48,9 @@ impl From<BlockFilter> for FilterBlockOption {
                 to_block,
             } => FilterBlockOption::Range {
                 from_block: Some(from_block),
-                to_block: to_block,
+                to_block,
             },
-            BlockFilter::AtBlockHash(block_hash) => FilterBlockOption::AtBlockHash(block_hash),
+            BlockFilter::AtBlockHash { hash } => FilterBlockOption::AtBlockHash(hash),
         }
     }
 }

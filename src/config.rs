@@ -27,7 +27,6 @@ pub struct Config {
 }
 
 pub fn load(path: PathBuf) -> IndexerResult<Config> {
-    let path = path.into();
     let conf = Config::with_layers(&[Layer::Yaml(path)])?; //TODO: Add additional level: ENV
 
     Ok(conf)

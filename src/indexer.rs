@@ -75,12 +75,11 @@ impl From<EventIndexingInfo> for Filter {
                 filter
             };
 
-            let filter = if let Some(topic3) = topic3 {
+            if let Some(topic3) = topic3 {
                 filter.topic3(topic3)
             } else {
                 filter
-            };
-            filter
+            }
         } else {
             filter
         }
