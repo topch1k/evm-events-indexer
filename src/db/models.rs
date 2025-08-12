@@ -7,7 +7,7 @@ use diesel::{Queryable, Selectable, prelude::Insertable};
 #[derive(Debug, Clone, Queryable, Selectable)]
 #[diesel(table_name = erc20_transfer_events)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct Erc20TranferEvents {
+pub struct Erc20TranferEvent {
     pub id: i32,
     pub from: String,
     pub to: String,
