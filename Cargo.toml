@@ -20,8 +20,15 @@ twelf = { version = "0.15.0", default-features = false, features = [
     "yaml",
     "env",
 ] }
-rusqlite = { version = "0.37.0", features = ["bundled"] }
-rusqlite_migration = { version = "2.3.0", features = ["from-directory"] }
+diesel = { version = "2.2.12", features = [
+    "sqlite",
+    "returning_clauses_for_sqlite_3_35",
+    "chrono",
+    "r2d2",
+    "numeric",
+] }
+diesel_migrations = { version = "2.2.0" }
+chrono = { version = "0.4.41" }
 r2d2_sqlite = { version = "0.31.0" }
 r2d2 = { version = "0.8.10" }
 include_dir = { version = "0.7.4" }

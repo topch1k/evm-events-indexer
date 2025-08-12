@@ -1,20 +1,23 @@
-use include_dir::{Dir, include_dir};
+use crate::errors::{Errors, IndexerResult};
+use diesel::{SqliteConnection, r2d2::ConnectionManager, sqlite::Sqlite};
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use r2d2::Pool;
-use r2d2_sqlite::SqliteConnectionManager;
-use rusqlite_migration::Migrations;
-use std::sync::LazyLock;
 
-use crate::errors::IndexerResult;
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
-static MIGRATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/migrations");
+pub fn init_db(db_path: &str) -> IndexerResult<Pool<ConnectionManager<SqliteConnection>>> {
+    let manager = ConnectionManager::<SqliteConnection>::new(db_path);
+    let pool: Pool<ConnectionManager<SqliteConnection>> = r2d2::Pool::builder().build(manager)?;
 
-static MIGRATIONS: LazyLock<Migrations<'static>> =
-    LazyLock::new(|| Migrations::from_directory(&MIGRATIONS_DIR).unwrap());
-
-pub fn init_db(db_path: &str) -> IndexerResult<Pool<SqliteConnectionManager>> {
-    let pool = Pool::new(SqliteConnectionManager::file(db_path))?;
-    let mut conn = pool.get()?;
-    MIGRATIONS.to_latest(&mut conn)?;
+    run_migrations(&mut pool.get()?)?;
 
     Ok(pool)
+}
+
+fn run_migrations(conn: &mut impl MigrationHarness<Sqlite>) -> IndexerResult<()> {
+    let _ = conn.run_pending_migrations(MIGRATIONS).map_err(|e| {
+        log::warn!("Running migration error : {e:?}");
+        Errors::RunningMigrationErrors
+    })?;
+    Ok(())
 }

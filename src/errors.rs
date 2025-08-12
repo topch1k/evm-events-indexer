@@ -7,9 +7,6 @@ pub enum Errors {
     ProviderErrors(#[from] ethers::providers::ProviderError),
 
     #[error(transparent)]
-    TokioSendError(#[from] tokio::sync::mpsc::error::SendError<ethers::types::Log>),
-
-    #[error(transparent)]
     EthAbiErrors(#[from] ethers::abi::Error),
 
     #[error(transparent)]
@@ -19,10 +16,13 @@ pub enum Errors {
     R2D2Errors(#[from] r2d2::Error),
 
     #[error(transparent)]
-    RusqliteErrors(#[from] rusqlite::Error),
+    DieselErrors(#[from] diesel::result::Error),
 
     #[error(transparent)]
-    RusqliteMigrationErrors(#[from] rusqlite_migration::Error),
+    DieselMigrationsErrors(#[from] diesel_migrations::MigrationError),
+
+    #[error("Running migrations error")]
+    RunningMigrationErrors,
 }
 
 pub type IndexerResult<T> = Result<T, Errors>;

@@ -1,16 +1,24 @@
-use r2d2_sqlite::SqliteConnectionManager;
+use diesel::{RunQueryDsl, SqliteConnection, dsl::insert_into, r2d2::ConnectionManager};
+use r2d2::Pool;
+// use r2d2::Pool;
+// use r2d2_sqlite::SqliteConnectionManager;
+// use r2d2_sqlite::SqliteConnectionManager;
 
 use crate::{
-    db::repository::EventRepository, errors::Errors, event::EventMessage,
+    db::{
+        models::NewErc20TransferEvent, repository::EventRepository, schema::erc20_transfer_events,
+    },
+    errors::Errors,
+    event::EventMessage,
     transfer_event::TransferEvent,
 };
 
 pub struct ERC20TransferRepo {
-    pool: r2d2::Pool<SqliteConnectionManager>,
+    pool: Pool<ConnectionManager<SqliteConnection>>,
 }
 
 impl ERC20TransferRepo {
-    pub fn new(pool: r2d2::Pool<SqliteConnectionManager>) -> Self {
+    pub fn new(pool: Pool<ConnectionManager<SqliteConnection>>) -> Self {
         Self { pool }
     }
 }
@@ -22,29 +30,14 @@ impl EventRepository for ERC20TransferRepo {
     async fn store_event(&self, event: EventMessage<TransferEvent>) -> Result<(), Self::Err> {
         log::trace!("Storing event : {event:?}");
 
-        let EventMessage {
-            block_number,
-            tx_hash,
-            log_index,
-            event: TransferEvent { from, to, value },
-        } = event;
+        let new_event: NewErc20TransferEvent = event.into();
 
-        let conn = self.pool.get()?;
-        let res = conn
-            .execute(
-                "INSERT INTO erc20_transfer_events(id, \"from\", \"to\", \"value\", block_number, tx_hash, log_index) 
-                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7 ) 
-                ON CONFLICT DO NOTHING",
-                (
-                    None::<u64>,
-                    from.to_string(),
-                    to.to_string(),
-                    value.to_string(),
-                    block_number.to_string(),
-                    tx_hash.to_string(),
-                    log_index.to_string(),
-                )
-            )?;
+        let mut conn = self.pool.get()?;
+
+        let res = insert_into(erc20_transfer_events::table)
+            .values(&new_event)
+            .on_conflict_do_nothing()
+            .execute(&mut conn)?;
 
         log::debug!("Inserting res : {res}",);
 
