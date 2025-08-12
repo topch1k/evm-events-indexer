@@ -3,12 +3,16 @@ use serde::Serialize;
 use std::path::PathBuf;
 use twelf::{Layer, config};
 
-use crate::{errors::IndexerResult, event::EventIndexingInfo};
+use crate::{cli::commands::Commands, errors::IndexerResult, event::EventIndexingInfo};
 
 #[derive(Debug, Parser)]
 #[command(version)]
 pub struct Args {
     pub config_path: String,
+    pub offset: Option<i64>,
+    pub limit: Option<i64>,
+    #[command(subcommand)]
+    pub command: Commands,
 }
 
 pub fn parse() -> Args {

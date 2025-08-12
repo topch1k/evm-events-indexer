@@ -1,5 +1,8 @@
 use crate::{
-    db::{init::init_db, transfer_repository::ERC20TransferRepo},
+    db::{
+        init::init_db, query_filters::Page, repository::EventRepository,
+        transfer_repository::ERC20TransferRepo,
+    },
     errors::IndexerResult,
     indexer::LogIndexer,
     log_consumer::TypedLogConsumer,
@@ -8,7 +11,7 @@ use crate::{
 use ethers::providers::{Provider, Ws};
 use std::path::PathBuf;
 
-pub mod config;
+pub mod cli;
 pub mod db;
 pub mod errors;
 pub mod event;
@@ -20,17 +23,29 @@ pub mod transfer_event;
 async fn main() -> IndexerResult<()> {
     env_logger::init();
 
-    let args = config::parse();
-    let conf = config::load(PathBuf::from(args.config_path))?;
+    let args = cli::config::parse();
+    let conf = cli::config::load(PathBuf::from(args.config_path))?;
 
     let pool = init_db(&conf.db_path)?;
     let repo = ERC20TransferRepo::new(pool);
 
-    let consumer = TypedLogConsumer::<TransferEvent, _>::new(conf.event_info.event.clone(), repo);
+    match args.command {
+        cli::commands::Commands::Start => {
+            let consumer =
+                TypedLogConsumer::<TransferEvent, _>::new(conf.event_info.event.clone(), repo);
 
-    let provider = Provider::<Ws>::connect(conf.node_url).await?;
-    let indexer = LogIndexer::new(provider, conf.event_info.clone());
-    indexer.run(conf.event_info, &consumer).await?;
+            let provider = Provider::<Ws>::connect(conf.node_url).await?;
+            let indexer = LogIndexer::new(provider, conf.event_info.clone());
+            indexer.run(conf.event_info, &consumer).await?;
+        }
+        cli::commands::Commands::ListBy { filter_by } => {
+            let events = repo
+                .get_events_by(filter_by.into(), Page::new(args.offset, args.limit))
+                .await?;
+
+            log::info!("{events:?}");
+        }
+    }
 
     Ok(())
 }
