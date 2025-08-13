@@ -18,6 +18,7 @@ pub mod event;
 pub mod indexer;
 pub mod log_consumer;
 pub mod transfer_event;
+pub mod interfaces;
 
 #[tokio::main]
 async fn main() -> IndexerResult<()> {

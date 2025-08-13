@@ -1,5 +1,5 @@
 use crate::errors::{Errors, IndexerResult};
-use crate::log_consumer::ConsumeEvent;
+use crate::interfaces::consume_event::ConsumeEvent;
 use ethers::middleware::Middleware;
 use ethers::providers::Ws;
 use ethers::{

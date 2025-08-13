@@ -4,6 +4,7 @@ use crate::{
     db::repository::EventRepository,
     errors::IndexerResult,
     event::{EventMessage, RawEventMessage},
+    interfaces::consume_event::ConsumeEvent,
 };
 use ethers::{
     abi::{Event, RawLog},
@@ -25,11 +26,6 @@ impl<R, T> EventsDbStorage<R, T> {
             _phantom: PhantomData,
         }
     }
-}
-
-#[async_trait::async_trait]
-pub trait ConsumeEvent<T> {
-    async fn consume_event(&self, log: Log) -> IndexerResult<()>;
 }
 
 #[async_trait::async_trait]
