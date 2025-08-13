@@ -4,7 +4,7 @@ use crate::{
 use chrono::{DateTime, Utc};
 use diesel::{Queryable, Selectable, prelude::Insertable};
 
-#[derive(Debug, Clone, Queryable, Selectable)]
+#[derive(Debug, Clone, Queryable, Selectable, Insertable)]
 #[diesel(table_name = erc20_transfer_events)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Erc20TranferEvent {

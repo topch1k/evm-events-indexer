@@ -1,3 +1,5 @@
+pub mod fill_tables;
+
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::sqlite::SqliteConnection;
 use diesel::{RunQueryDsl, sql_query};
