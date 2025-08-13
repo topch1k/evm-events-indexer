@@ -63,7 +63,7 @@ impl EventRepository for ERC20TransferRepo {
             FilterBy::From(from) => query.filter(erc20_transfer_events::from.eq(from)),
             FilterBy::To(to) => query.filter(erc20_transfer_events::to.eq(to)),
             FilterBy::TxHash(hash) => {
-                query.filter(erc20_transfer_events::tx_hash.eq(hash.to_string()))
+                query.filter(erc20_transfer_events::tx_hash.eq(format!("{hash:?}")))
             }
             FilterBy::BlockNumber(block_number) => {
                 query.filter(erc20_transfer_events::block_number.eq(block_number.to_string()))

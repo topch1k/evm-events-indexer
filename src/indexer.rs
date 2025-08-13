@@ -41,6 +41,7 @@ where
 
         let mut stream = self.provider.subscribe_logs(&filter).await?;
         while let Some(log) = stream.next().await {
+            log::debug!("{log:?}");
             log_consumer.consume_event(log).await?;
         }
         Ok(())
