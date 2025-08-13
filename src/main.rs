@@ -4,8 +4,8 @@ use crate::{
         transfer_repository::ERC20TransferRepo,
     },
     errors::IndexerResult,
-    indexer::LogIndexer,
-    log_consumer::TypedLogConsumer,
+    indexer::WsLogIndexer,
+    log_consumer::EventsDbStorage,
     transfer_event::TransferEvent,
 };
 use ethers::providers::{Provider, Ws};
@@ -32,10 +32,10 @@ async fn main() -> IndexerResult<()> {
     match args.command {
         cli::commands::Commands::Start => {
             let consumer =
-                TypedLogConsumer::<TransferEvent, _>::new(conf.event_info.event.clone(), repo);
+                EventsDbStorage::<_, TransferEvent>::new(conf.event_info.event.clone(), repo);
 
             let provider = Provider::<Ws>::connect(conf.node_url).await?;
-            let indexer = LogIndexer::new(provider, conf.event_info.clone());
+            let indexer = WsLogIndexer::new(provider);
             indexer.run(conf.event_info, &consumer).await?;
         }
         cli::commands::Commands::ListBy { filter_by } => {
@@ -43,7 +43,7 @@ async fn main() -> IndexerResult<()> {
                 .get_events_by(filter_by.into(), Page::new(args.offset, args.limit))
                 .await?;
 
-            log::info!("{events:?}");
+            log::info!("{events:?}"); //TODO:
         }
     }
 

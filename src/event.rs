@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use ethers::{
     abi::{Event, Hash, Token},
-    types::{Address, BlockNumber, FilterBlockOption, H256, U64, U256},
+    types::{Address, BlockNumber, Filter, FilterBlockOption, H256, U64, U256},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -115,4 +115,43 @@ pub struct EventMessage<T> {
     pub tx_hash: H256,
     pub log_index: U256,
     pub event: T,
+}
+
+impl From<EventIndexingInfo> for Filter {
+    fn from(value: EventIndexingInfo) -> Self {
+        let block_filter: FilterBlockOption = value.block_filter.clone().into();
+
+        let filter = Filter::new()
+            .address(value.contract)
+            .select(block_filter)
+            .topic0(value.event.signature());
+
+        if let Some(filters) = value.filters {
+            let TopicFilters {
+                topic1,
+                topic2,
+                topic3,
+            } = filters;
+
+            let filter = if let Some(topic1) = topic1 {
+                filter.topic1(topic1)
+            } else {
+                filter
+            };
+
+            let filter = if let Some(topic2) = topic2 {
+                filter.topic2(topic2)
+            } else {
+                filter
+            };
+
+            if let Some(topic3) = topic3 {
+                filter.topic3(topic3)
+            } else {
+                filter
+            }
+        } else {
+            filter
+        }
+    }
 }

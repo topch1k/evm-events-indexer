@@ -1,4 +1,4 @@
-use std::{fmt::Debug, marker::PhantomData};
+use std::marker::PhantomData;
 
 use crate::{
     db::repository::EventRepository,
@@ -11,13 +11,13 @@ use ethers::{
 };
 use serde::de::DeserializeOwned;
 
-pub struct TypedLogConsumer<T, R> {
+pub struct EventsDbStorage<R, T> {
     pub event: Event,
     pub repo: R,
     _phantom: PhantomData<T>,
 }
 
-impl<T, R> TypedLogConsumer<T, R> {
+impl<R, T> EventsDbStorage<R, T> {
     pub fn new(event: Event, repository: R) -> Self {
         Self {
             event,
@@ -28,18 +28,15 @@ impl<T, R> TypedLogConsumer<T, R> {
 }
 
 #[async_trait::async_trait]
-pub trait ConsumeEvent<T, R: EventRepository<EventType = T>>
-where
-    T: DeserializeOwned + Debug,
-{
+pub trait ConsumeEvent<T> {
     async fn consume_event(&self, log: Log) -> IndexerResult<()>;
 }
 
 #[async_trait::async_trait]
-impl<T, R: EventRepository<EventType = T> + Sync + Send> ConsumeEvent<T, R>
-    for TypedLogConsumer<T, R>
+impl<R, T> ConsumeEvent<T> for EventsDbStorage<R, T>
 where
-    T: DeserializeOwned + Debug + Send + Sync,
+    T: DeserializeOwned + Send + Sync,
+    R: EventRepository<EventType = T> + Sync + Send,
 {
     async fn consume_event(&self, log: Log) -> IndexerResult<()> {
         let raw_log: RawLog = (log.topics, log.data.to_vec()).into();
@@ -60,7 +57,7 @@ where
             .repo
             .store_event(event_msg)
             .await
-            .inspect_err(|e| log::warn!("Storing event error : {e:?}")); //TODO:
+            .inspect_err(|e| log::warn!("Storing event error : {e:?}"));
 
         Ok(())
     }
