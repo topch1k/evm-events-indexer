@@ -8,13 +8,10 @@ use crate::{cli::commands::Commands, errors::IndexerResult, event::EventIndexing
 #[derive(Debug, Parser)]
 #[command(version)]
 pub struct Args {
-    pub config_path: String,
     #[command(subcommand)]
     pub command: Commands,
     #[arg(long)]
-    pub offset: Option<i64>,
-    #[arg(long)]
-    pub limit: Option<i64>,
+    pub config_path: String,
 }
 
 pub fn parse() -> Args {
@@ -25,15 +22,12 @@ pub fn parse() -> Args {
 #[serde(rename_all = "kebab-case")]
 #[config]
 pub struct Config {
-    pub log_level: String, //TODO: Use log level from config
-    pub port: u32,
     pub event_info: EventIndexingInfo,
     pub db_path: String,
     pub node_url: String,
 }
 
 pub fn load(path: PathBuf) -> IndexerResult<Config> {
-    let conf = Config::with_layers(&[Layer::Yaml(path)])?; //TODO: Add additional level: ENV
-
+    let conf = Config::with_layers(&[Layer::Yaml(path)])?;
     Ok(conf)
 }

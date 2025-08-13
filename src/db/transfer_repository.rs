@@ -42,7 +42,7 @@ impl EventRepository for ERC20TransferRepo {
             .on_conflict_do_nothing()
             .execute(&mut self.pool.get()?)?;
 
-        log::debug!("Inserting res : {res}",);
+        log::trace!("Inserting res : {res}",);
 
         Ok(())
     }

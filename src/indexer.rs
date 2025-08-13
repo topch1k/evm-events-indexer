@@ -40,7 +40,7 @@ where
             .await
             .map_err(Into::<Errors>::into)?;
         while let Some(log) = stream.next().await {
-            log::debug!("{log:?}");
+            log::info!("{log:?}");
             log_consumer.consume_event(log).await?;
         }
         Ok(())

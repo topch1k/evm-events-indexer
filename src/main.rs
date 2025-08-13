@@ -8,6 +8,7 @@ use crate::{
     log_consumer::EventsDbStorage,
     transfer_event::TransferEvent,
 };
+use env_logger::Env;
 use ethers::providers::{Provider, Ws};
 use std::path::PathBuf;
 
@@ -22,7 +23,7 @@ pub mod transfer_event;
 
 #[tokio::main]
 async fn main() -> IndexerResult<()> {
-    env_logger::init();
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
     let args = cli::config::parse();
     let conf = cli::config::load(PathBuf::from(args.config_path))?;
@@ -48,7 +49,7 @@ async fn main() -> IndexerResult<()> {
                 .get_events_by(filter_by.into(), Page::new(offset, limit))
                 .await?;
 
-            log::info!("{events:?}"); //TODO:
+            log::info!("{events:#?}");
         }
     }
 
