@@ -155,3 +155,89 @@ impl From<EventIndexingInfo> for Filter {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ethers::abi::Token;
+    use ethers::types::{Address, U256};
+    use serde_json::json;
+
+    #[test]
+    fn test_eth_token_to_json_value_address() {
+        let addr = Address::random();
+        let token = Token::Address(addr);
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, serde_json::to_value(addr).unwrap());
+    }
+
+    #[test]
+    fn test_eth_token_to_json_value_fixed_bytes() {
+        let bytes = vec![1, 2, 3, 4];
+        let token = Token::FixedBytes(bytes.clone());
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, json!("0x01020304"));
+    }
+
+    #[test]
+    fn test_eth_token_to_json_value_bytes() {
+        let bytes = vec![10, 20, 30];
+        let token = Token::Bytes(bytes.clone());
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, json!("0x0a141e"));
+    }
+
+    #[test]
+    fn test_eth_token_to_json_value_int() {
+        let int = U256::from(12345);
+        let token = Token::Int(int);
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, serde_json::to_value(int).unwrap());
+    }
+
+    #[test]
+    fn test_eth_token_to_json_value_uint() {
+        let uint = U256::from(12345);
+        let token = Token::Uint(uint);
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, serde_json::to_value(uint).unwrap());
+    }
+
+    #[test]
+    fn test_eth_token_to_json_value_bool() {
+        let token = Token::Bool(true);
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, json!(true));
+    }
+
+    #[test]
+    fn test_eth_token_to_json_value_string() {
+        let token = Token::String("hello".to_string());
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, json!("hello"));
+    }
+
+    #[test]
+    fn test_eth_token_to_json_value_fixed_array() {
+        let arr = vec![Token::Bool(true), Token::Bool(false)];
+        let token = Token::FixedArray(arr);
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, json!([true, false]));
+    }
+
+    #[test]
+    fn test_eth_token_to_json_value_array() {
+        let arr = vec![Token::Uint(U256::from(1)), Token::Uint(U256::from(2))];
+        let token = Token::Array(arr);
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, json!(["0x1", "0x2"]));
+    }
+
+    #[test]
+    fn test_eth_token_to_json_value_tuple() {
+        let tuple = vec![Token::String("a".to_string()), Token::Bool(false)];
+        let token = Token::Tuple(tuple);
+        let value = eth_token_to_json_value(token).unwrap();
+        assert_eq!(value, json!(["a", false]));
+    }
+}
