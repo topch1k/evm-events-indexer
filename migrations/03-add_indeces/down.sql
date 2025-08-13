@@ -1,0 +1,4 @@
+DROP INDEX erc20_transfer_events_tx_hash_index;
+DROP INDEX erc20_transfer_events_block_number_index;
+DROP INDEX erc20_transfer_events_to_index;
+DROP INDEX erc20_transfer_events_from_index;

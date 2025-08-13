@@ -10,6 +10,3 @@ CREATE TABLE erc20_transfer_events(
     updated TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(tx_hash, log_index)
 );
--- TODO: 
--- 1. Add triggers for created, updated
--- 2. Add index according to get requests
