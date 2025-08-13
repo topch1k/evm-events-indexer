@@ -5,7 +5,7 @@ use crate::{
         repository::EventRepository,
         schema::erc20_transfer_events,
     },
-    errors::Errors,
+    errors::{Errors, IndexerResult},
     event::EventMessage,
     transfer_event::TransferEvent,
 };
@@ -33,7 +33,7 @@ impl EventRepository for ERC20TransferRepo {
     type EventEntity = Erc20TranferEvent;
     type Page = Page;
 
-    async fn store_event(&self, event: EventMessage<TransferEvent>) -> Result<(), Self::Err> {
+    async fn store_event(&self, event: EventMessage<TransferEvent>) -> IndexerResult<()> {
         log::trace!("Storing event : {event:?}");
 
         let new_event: NewErc20TransferEvent = event.into();
@@ -51,7 +51,7 @@ impl EventRepository for ERC20TransferRepo {
         &self,
         query_filter: FilterBy,
         page: Page,
-    ) -> Result<Vec<Erc20TranferEvent>, Self::Err> {
+    ) -> IndexerResult<Vec<Erc20TranferEvent>> {
         log::debug!("Getting event by : {query_filter:?}");
 
         let query = erc20_transfer_events::table
