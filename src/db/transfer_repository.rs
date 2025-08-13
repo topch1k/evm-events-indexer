@@ -78,6 +78,8 @@ impl EventRepository for ERC20TransferRepo {
             query = query.limit(limit)
         }
 
+        query = query.order_by(erc20_transfer_events::created.desc());
+
         let events = query.load::<Erc20TranferEvent>(&mut self.pool.get()?)?;
 
         Ok(events)
