@@ -6,11 +6,12 @@ use diesel::{RunQueryDsl, sql_query};
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use std::fs;
 use std::path::PathBuf;
-const DB_FILE: &str = "test.sqlite";
+const DB_FILE: &str = ":memory:";
+// const DB_FILE: &str = "test.sqlite";
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
-fn setup_db() -> Pool<ConnectionManager<SqliteConnection>> {
+pub fn setup_db() -> Pool<ConnectionManager<SqliteConnection>> {
     if PathBuf::from(DB_FILE).exists() {
         fs::remove_file(DB_FILE).unwrap();
     }
@@ -27,7 +28,7 @@ fn setup_db() -> Pool<ConnectionManager<SqliteConnection>> {
     pool
 }
 
-fn remove_db() {
+pub fn remove_db() {
     if PathBuf::from(DB_FILE).exists() {
         fs::remove_file(DB_FILE).unwrap();
     }

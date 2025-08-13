@@ -5,6 +5,13 @@ use diesel::{RunQueryDsl, SqliteConnection};
 use logger_playground::db::models::Erc20TranferEvent;
 use r2d2::PooledConnection;
 
+pub const FROM: &str = "0xdac17f958d2ee523a2206206994597c13d831ec7";
+pub const TO: &str = "110ba8f305a5ae6815b4fa123a61d94d26b4e1f7";
+pub const VALUE: u64 = 1000;
+pub const BLOCK_NUMBER: u64 = 1234;
+pub const TX_HASH: &str = "0x378108375f820b65276b6db3a180faa0b71a28b8aa24234dd7c143db149ea3b9";
+pub const LOG_INDEX: u64 = 7;
+
 pub fn erc20_transfer_events() -> Vec<Erc20TranferEvent> {
     vec![
         Erc20TranferEvent {
