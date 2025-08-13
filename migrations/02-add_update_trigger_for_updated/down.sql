@@ -1,0 +1,1 @@
+DROP TRIGGER erc20_transfer_events_updated_trigger;
