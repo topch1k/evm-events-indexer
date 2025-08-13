@@ -16,9 +16,9 @@ pub mod db;
 pub mod errors;
 pub mod event;
 pub mod indexer;
+pub mod interfaces;
 pub mod log_consumer;
 pub mod transfer_event;
-pub mod interfaces;
 
 #[tokio::main]
 async fn main() -> IndexerResult<()> {
@@ -39,9 +39,13 @@ async fn main() -> IndexerResult<()> {
             let indexer = WsLogIndexer::new(provider);
             indexer.run(conf.event_info, &consumer).await?;
         }
-        cli::commands::Commands::ListBy { filter_by } => {
+        cli::commands::Commands::ListBy {
+            filter_by,
+            offset,
+            limit,
+        } => {
             let events = repo
-                .get_events_by(filter_by.into(), Page::new(args.offset, args.limit))
+                .get_events_by(filter_by.into(), Page::new(offset, limit))
                 .await?;
 
             log::info!("{events:?}"); //TODO:
