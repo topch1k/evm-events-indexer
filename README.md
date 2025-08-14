@@ -94,7 +94,7 @@ The current implementation contains a consumer that stores received logs in the 
 - For updating `updated` field, trigger was created. It updates field value with row updates. 
 - The schema could be enhanced by using custom types, such as a custom `hash` type instead of `Text` or a custom `U256` type for values. This would provide stronger type safety guarantees and reduce the risk of data inconsistencies.
 
-- **CLI Commands**: Defined in `src/cli/commands.rs`. Each command interacts with the database or event system.
+- **CLI Commands**: Defined in `src/cli/commands.rs`.
 - **Config**: `src/cli/config.rs` manages configuration loading and parsing.
 
 ### CLI Interaction
@@ -102,11 +102,12 @@ The current implementation contains a consumer that stores received logs in the 
 	- Start listening for events
 - There are several filter options available for retrieving events:
 	- Filter by transaction hash
+	- Filter by receiver or sender
+	- Filter by block number
+	- Filter by event id
 
 ### Interfaces
 - **ConsumeEvent**: Trait in `src/interfaces/consume_event.rs` for consuming events from external sources.
-## Structure Relations
-- **Interfaces** provide abstraction for consuming events from logs or other sources.
 ---
 
 
