@@ -17,5 +17,5 @@ event-info:
   contract: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
   block-filter:
     kind: "range"
-    from-block: "latest"
+    from-block: "latest" # finalized - for only finalized blocks
     # to-block: "23096181"

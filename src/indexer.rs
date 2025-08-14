@@ -40,6 +40,12 @@ where
             .await
             .map_err(Into::<Errors>::into)?;
         while let Some(log) = stream.next().await {
+            if let Some(removed) = log.removed {
+                if removed {
+                    // Don't save log if it was removed because of reorganisation.
+                    continue;
+                }
+            }
             log::info!("{log:?}");
             log_consumer.consume_event(log).await?;
         }

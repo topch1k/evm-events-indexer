@@ -78,6 +78,9 @@ The current implementation contains a consumer that stores received logs in the 
 - With such an improvement, after parsing the configuration, several indexers could be instantiated, each with its own event type and consumer implementation.
 - This would allow the system to index and process various event types in parallel, each with custom logic for handling and storing events.
 
+### Finality and Reorgs
+- For listening to only finalized blocks the according block number alias `finalized` can be used. Example can be found in `examples/example_config.yaml`
+- Logs that were removed because of reorgs have specific flag `removed` and just skipped from storing in db. 
 
 ### Event Structures
 ### Database Layer
